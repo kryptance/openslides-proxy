@@ -116,7 +116,7 @@
                   "handler": "reverse_proxy",
                   "upstreams": [
                     {
-                      "dial": "$AUTH_HOST:$AUTH_PORT"
+                      "dial": "$KEYCLOAK_HOST:$KEYCLOAK_PORT"
                     }
                   ]
                 }
@@ -183,6 +183,41 @@
                   "header": {
                     "Content-Type": ["application/grpc"]
                   }
+                }
+              ]
+            },
+            {
+              "handle": [
+                {
+                  "handler": "rewrite",
+                  "strip_path_prefix": "/idp"
+                },
+                {
+                  "handler": "reverse_proxy",
+                  "upstreams": [
+                    {
+                      "dial": "$KEYCLOAK_HOST:$KEYCLOAK_PORT"
+                    }
+                  ],
+                  "headers": {
+                    "request": {
+                      "set": {
+                        "X-Forwarded-For": [
+                          "{http.request.remote.host}"
+                        ],
+                        "X-Forwarded-Proto": [
+                          "{http.request.scheme}"
+                        ]
+                      }
+                    }
+                  }
+                }
+              ],
+              "match": [
+                {
+                  "path": [
+                    "/idp/*"
+                  ]
                 }
               ]
             },
